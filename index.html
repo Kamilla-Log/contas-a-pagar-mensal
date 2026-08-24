@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contas a Pagar — Dashboard CP | Logcomex</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Funnel+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple-dark:#2D085D;--purple-primary:#6613D0;--purple-mid:#8E44ED;
+  --purple-light:#E2D0FA;--orange:#FE8F1C;--bg:#F5F6FC;--fg:#0B0D19;
+  --card:#FFFFFF;--muted:#6B7280;--border:#E5E7EB;
+  --success:#1FAC66;--danger:#C70404;--warning:#C99D02;--info:#1DA6AE;
+}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,var(--purple-dark) 0%,var(--purple-primary) 60%,var(--purple-mid) 100%);padding:28px 48px;display:flex;align-items:center;justify-content:space-between}
+.header-left h1{font-family:'Funnel Display',sans-serif;font-size:26px;color:#fff;margin-bottom:4px}
+.header-left p{color:rgba(255,255,255,0.75);font-size:13px}
+.logo-wrap{margin-bottom:10px}
+.header-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:8px 16px;color:#fff;font-size:13px;font-weight:500}
+
+/* NAV */
+.nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 48px;display:flex;gap:0;overflow-x:auto}
+.nav-tab{padding:14px 22px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.nav-tab:hover{color:var(--purple-primary)}
+.nav-tab.active{color:var(--purple-primary);border-bottom-color:var(--purple-primary)}
+
+/* CONTENT */
+.content{padding:32px 48px;max-width:1400px;margin:0 auto}
+.section{display:none}.section.active{display:block}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid))}
+.kpi-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:300;color:var(--fg);margin-bottom:4px}
+.kpi-value span{font-size:14px;font-weight:500}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.kpi-delta{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;display:inline-block;margin-top:2px}
+.kpi-delta.up{background:#FEF3C7;color:#B45309}
+.kpi-delta.down{background:#F5F0FF;color:var(--purple-primary)}
+.kpi-delta.neutral{background:#EDE9FE;color:var(--purple-primary)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.card-title{font-family:'Funnel Display',sans-serif;font-size:17px;color:var(--fg);margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+
+/* GRID LAYOUTS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+
+/* INSIGHT BOX */
+.insight-box{background:linear-gradient(135deg,var(--purple-dark),var(--purple-primary));border-radius:12px;padding:24px 28px;margin-bottom:24px;border:1px dashed rgba(255,255,255,0.3)}
+.insight-box h3{font-family:'Funnel Display',sans-serif;font-size:20px;color:#fff;text-align:center;margin-bottom:20px}
+.insight-item{margin-bottom:14px;font-size:13px;color:rgba(255,255,255,0.9);line-height:1.6}
+.insight-item strong{color:#fff;font-weight:600}
+.insight-label{color:var(--orange);font-weight:700}
+
+/* HIGHLIGHT BOX */
+.highlight-box{background:linear-gradient(135deg,var(--purple-dark),var(--purple-primary));border-radius:12px;padding:16px 20px;margin-top:12px}
+.highlight-box p{font-size:13px;color:rgba(255,255,255,.9);line-height:1.6}
+.highlight-box strong{color:#fff}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--bg);padding:10px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--fg)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFAFA}
+.td-right{text-align:right;font-weight:600}
+.td-muted{text-align:right;color:var(--muted);font-size:12px}
+.tr-highlight{background:#F5F0FF!important}
+.tr-highlight td{font-weight:700}
+
+/* HORIZONTAL BAR CHART */
+.hbar-chart{display:flex;flex-direction:column;gap:8px}
+.hbar-row{display:flex;align-items:center;gap:10px}
+.hbar-label{font-size:12px;color:var(--fg);width:110px;min-width:110px;max-width:110px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar-track{flex:1;background:var(--bg);border-radius:4px;height:24px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:600;color:#fff;transition:width .6s ease}
+.hbar-fill.purple{background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid))}
+.hbar-fill.orange{background:linear-gradient(90deg,var(--orange),#FEB44E)}
+.hbar-fill.dark{background:linear-gradient(90deg,var(--purple-dark),var(--purple-primary))}
+.hbar-val{font-size:12px;font-weight:600;min-width:55px;text-align:right;color:var(--fg);flex-shrink:0}
+
+/* DUAL BAR CHART (rec vs pag) */
+.dual-chart{display:flex;flex-direction:column;gap:6px}
+.dual-row{display:flex;align-items:center;gap:8px}
+.dual-month{font-size:11px;color:var(--muted);min-width:48px;text-align:right;flex-shrink:0}
+.dual-bars{flex:1;display:flex;flex-direction:column;gap:2px}
+.dual-bar{height:10px;border-radius:3px;transition:width .5s}
+.dual-bar.rec{background:var(--purple-primary);opacity:.85}
+.dual-bar.pag{background:var(--orange);opacity:.9}
+.dual-legend{display:flex;gap:16px;margin-bottom:12px;font-size:12px}
+.dual-legend span{display:flex;align-items:center;gap:6px}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.section-header h2{font-family:'Funnel Display',sans-serif;font-size:22px;color:var(--fg)}
+.section-header p{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* PILLS */
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.pill.manual{background:#FEF3C7;color:#B45309}
+.pill.auto{background:#F5F0FF;color:var(--purple-primary)}
+.pill.dev{background:#EDE9FE;color:var(--purple-primary)}
+.pill.risk{background:#FEE2E2;color:#991B1B}
+.pill.ok{background:#F5F0FF;color:var(--purple-primary)}
+
+/* DOR CARDS */
+.dor-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.dor-item{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--purple-primary);border-radius:8px;padding:14px 16px}
+.dor-item.risk{border-left-color:var(--danger)}
+.dor-item.ok{border-left-color:var(--success)}
+.dor-item.dev{border-left-color:var(--warning)}
+.dor-item h4{font-size:13px;font-weight:600;margin-bottom:4px}
+.dor-item p{font-size:12px;color:var(--muted);line-height:1.5}
+.dor-item .solution{font-size:11px;color:var(--purple-primary);font-weight:600;margin-top:6px}
+
+/* FLOW */
+.flow-wrap{overflow-x:auto;padding-bottom:8px}
+.flow{display:flex;align-items:flex-start;gap:0;min-width:900px}
+.flow-step{display:flex;flex-direction:column;align-items:center;flex:1;min-width:90px}
+.flow-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--purple-primary),var(--purple-mid));color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;margin-bottom:8px}
+.flow-label{font-size:11px;font-weight:600;text-align:center;color:var(--fg);margin-bottom:3px}
+.flow-desc{font-size:10px;color:var(--muted);text-align:center;max-width:88px;line-height:1.4}
+.flow-arrow{display:flex;align-items:center;padding-top:10px;color:var(--purple-light);font-size:20px;flex:0;margin:0 2px}
+
+/* HISTÓRICO TABLE */
+.hist-table-wrap{overflow-x:auto}
+.hist-table{min-width:800px}
+.hist-table th{white-space:nowrap}
+.hist-table td{white-space:nowrap;text-align:right}
+.hist-table td:first-child{text-align:left;font-weight:500}
+
+/* PIPES CARDS - 4 separados */
+.pipes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.pipes-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;text-align:center}
+.pipes-card .p-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px}
+.pipes-card .p-value{font-size:32px;font-weight:300;color:var(--fg);margin-bottom:6px}
+.pipes-card .p-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600}
+.pipes-card .p-badge.cp{background:#EDE9FE;color:var(--purple-primary)}
+.pipes-card .p-badge.reimb{background:#FEF3C7;color:#B45309}
+.pipes-card .p-badge.intern{background:#DBEAFE;color:#1D4ED8}
+.pipes-card .p-badge.total{background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));color:#fff}
+
+/* FOOTER */
+.footer{text-align:center;padding:20px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:40px}
+
+@media(max-width:900px){
+  .kpi-grid,.pipes-grid{grid-template-columns:repeat(2,1fr)}
+  .two-col,.three-col{grid-template-columns:1fr}
+  .content{padding:16px}
+  .header{padding:16px;flex-direction:column;gap:12px}
+  .nav{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-wrap">
+      <svg viewBox="0 0 197 30" height="26" xmlns="http://www.w3.org/2000/svg">
+        <path d="M170.124 20.0846H167.091V23.1403H170.124V20.0846Z" fill="#fff"/>
+        <path d="M191.659 23.1386V7.58946H194.71V21.0058C194.71 22.1838 193.755 23.1386 192.577 23.1386H191.659Z" fill="#fff"/>
+        <path d="M193.263 0.0574C193.429 1.631 194.663 2.879 196.224 3.041C196.3 3.051 196.3 3.166 196.224 3.17C194.663 3.338 193.424 4.581 193.263 6.154C193.254 6.231 193.14 6.231 193.135 6.154C192.969 4.581 191.735 3.333 190.174 3.17C190.098 3.161 190.098 3.046 190.174 3.041C191.735 2.874 192.974 1.631 193.135 0.0574C193.144 -0.019 193.258 -0.019 193.263 0.0574Z" fill="#fff"/>
+        <path d="M34.6369 17.3919V0.96096H31.4808V17.3786C31.4808 20.5613 34.0752 23.1423 37.2727 23.1423H38.0798V20.0025H37.2549C35.8047 20.0025 34.6325 18.8347 34.6325 17.3948H34.6369Z" fill="#fff"/>
+        <path d="M47.7122 7.63091C45.446 7.63091 43.5509 8.37448 42.077 9.83796C40.584 11.2837 39.8286 13.1493 39.8286 15.3874C39.8286 17.6255 40.584 19.491 42.077 20.9368C43.5509 22.4017 45.446 23.1438 47.7122 23.1438C49.9784 23.1438 51.8735 22.3988 53.3473 20.9368C54.8404 19.491 55.5972 17.6255 55.5972 15.3874C55.5972 13.1493 54.8418 11.2837 53.3488 9.83796C51.875 8.373 49.9798 7.63091 47.7122 7.63091ZM51.1151 18.7726C50.2267 19.6581 49.0855 20.1045 47.7107 20.1045C46.3359 20.1045 45.1962 19.6581 44.3063 18.7726C43.4178 17.8915 42.9684 16.7518 42.9684 15.3859C42.9684 14.02 43.4193 12.8847 44.3063 11.9992C45.1947 11.1137 46.3359 10.6673 47.7107 10.6673C49.0855 10.6673 50.2252 11.1137 51.1151 11.9992C52.0051 12.8847 52.453 14.0214 52.453 15.3859C52.453 16.7503 52.0021 17.8886 51.1151 18.7726Z" fill="#fff"/>
+        <path d="M69.286 7.65455H72.4406V22.8807C72.4406 27.5106 69.8137 30 64.6324 30C62.3411 30 60.31 29.3318 58.505 27.8846L60.446 25.3789C62.3278 26.8587 64.696 26.8587 64.696 26.8587C67.5993 26.8587 69.286 25.4602 69.286 23.1305V21.6508C68.0531 22.4919 66.5837 22.9147 64.897 22.9147C62.7107 22.9147 60.8939 22.2036 59.4792 20.7978C58.0645 19.3949 57.349 17.5826 57.349 15.408C57.349 13.2335 58.0645 11.4241 59.4792 10.0183C60.8924 8.61246 62.7107 7.90142 64.897 7.90142C66.5852 7.90142 68.0531 8.32568 69.286 9.16681V7.65455ZM69.286 14.6142C68.7449 12.8832 68.0901 12.2313 68.0901 12.2313C67.2563 11.4019 66.1846 10.9806 64.897 10.9806C63.6094 10.9806 62.5362 11.4019 61.704 12.2313C60.8732 13.0606 60.4504 14.1279 60.4504 15.408C60.4504 16.6882 60.8717 17.757 61.704 18.5848C62.5377 19.4141 63.6109 19.8354 64.897 19.8354C66.1831 19.8354 67.2563 19.4141 68.0901 18.5848C68.7435 17.9329 69.1441 17.1332 69.286 16.2004V14.6142Z" fill="#fff"/>
+        <path d="M86.4294 18.6307C86.2683 18.8051 86.0983 18.9677 85.9061 19.1185C85.0768 19.7719 84.0671 20.1015 82.9097 20.1015C81.5378 20.1015 80.3922 19.6551 79.5052 18.7696C78.6168 17.8886 78.1674 16.7488 78.1674 15.3829C78.1674 14.017 78.6182 12.8817 79.5052 11.9962C80.3951 11.1107 81.5349 10.6643 82.9097 10.6643C84.0671 10.6643 85.0768 10.9954 85.9061 11.6473C86.0997 11.7981 86.2668 11.9667 86.4279 12.1411L88.3526 9.65908C86.7221 8.2503 84.9585 7.62499 82.9082 7.62499C80.642 7.62499 78.7469 8.36856 77.273 9.83204C75.78 11.2778 75.0231 13.1434 75.0231 15.3814C75.0231 17.6195 75.7785 19.4851 77.2716 20.9309C78.7454 22.3958 80.6405 23.1379 82.9067 23.1379C84.9541 23.1379 86.7206 22.517 88.1531 21.2871L86.4294 18.6307Z" fill="#fff"/>
+        <path d="M97.9214 7.63091C95.6553 7.63091 93.7586 8.37448 92.2863 9.83796C90.7932 11.2837 90.0379 13.1493 90.0379 15.3874C90.0379 17.6255 90.7932 19.491 92.2863 20.9368C93.7601 22.4017 95.6553 23.1438 97.9214 23.1438C100.188 23.1438 102.083 22.3988 103.557 20.9368C105.05 19.491 105.805 17.6255 105.805 15.3874C105.805 13.1493 105.05 11.2837 103.557 9.83796C102.086 8.373 100.188 7.63091 97.9214 7.63091ZM101.326 18.7726C100.436 19.6581 99.2962 20.1045 97.9214 20.1045C96.5467 20.1045 95.4069 19.6581 94.517 18.7726C93.6271 17.8915 93.1806 16.7518 93.1806 15.3859C93.1806 14.02 93.6315 12.8847 94.517 11.9992C95.4054 11.1137 96.5467 10.6673 97.9214 10.6673C99.2962 10.6673 100.436 11.1137 101.326 11.9992C102.214 12.8847 102.662 14.0214 102.662 15.3859C102.662 16.7503 102.213 17.8886 101.326 18.7726Z" fill="#fff"/>
+        <path d="M115.931 7.63091H111.822V10.8033H108.63V23.1438H111.823V10.8077H115.946C117.412 10.8077 118.601 11.9888 118.601 13.4479V23.1423H121.794V13.4612C121.794 10.2415 119.17 7.63091 115.931 7.63091Z" fill="#fff"/>
+        <path d="M125.207 7.63091H121.151V10.8077H125.221C126.687 10.8077 127.873 11.9888 127.873 13.4479V23.1423H131.066V13.4612C131.066 10.2415 128.442 7.63091 125.207 7.63091Z" fill="#fff"/>
+        <path d="M137.271 18.2833C137.764 19.0638 138.401 19.6285 139.212 20.0306C140.048 20.443 141.007 20.647 142.093 20.647C142.864 20.647 143.576 20.5273 144.233 20.2834C144.89 20.0468 145.593 19.6226 146.338 19.0165L147.776 20.922C146.111 22.0262 144.741 22.6235 141.799 23.098C140.223 23.098 138.826 22.7861 137.605 22.1652C136.404 21.5251 135.456 20.6559 134.758 19.5605C134.081 18.4651 133.743 17.2041 133.743 15.7776C133.743 13.3483 134.719 11.4 136.615 10.01C138.089 8.97 139.7 8.09359 141.535 8.09359C143.443 8.09359 145.151 8.9909 146.503 10.0952C147.953 11.4552 148.446 13.09 148.417 15.0843V16.23H136.615C136.716 17.0696 136.93 17.7127 137.271 18.2833ZM145.513 14.1086C145.448 13.2084 145.227 12.6511 144.847 12.1588C144.469 11.668 143.989 11.2837 143.412 11.0013C142.834 10.719 142.206 10.5786 141.53 10.5786C138.089 10.7737 137.15 12.8625 136.72 14.1086H145.513Z" fill="#fff"/>
+        <path d="M160.941 7.63091L156.734 13.0606L152.523 7.63091H148.936L154.956 15.3859L148.936 23.1423H152.523L156.734 17.7112L160.941 23.1423H164.528L158.511 15.3859L164.528 7.63091H160.941Z" fill="#fff"/>
+        <path d="M22.3405 18.0675H17.2352V23.1429H22.3405V18.0675Z" fill="#fff"/>
+        <path d="M5.10529 6.64643L0 11.7254V18.0891C0 20.8816 2.27851 23.1467 5.08749 23.1467H11.4887L16.594 18.0714H5.10529V6.64643Z" fill="#fff"/>
+        <path d="M17.2311 6.01289V17.4343L22.3364 12.3589V0.9375H10.8513L5.746 6.01289H17.2311Z" fill="rgba(255,255,255,0.6)"/>
+      </svg>
+    </div>
+    <h1>Contas a Pagar — Dashboard Operacional</h1>
+    <p>Controle mensal · Financeiro CP · Logcomex 2026</p>
+  </div>
+  <div class="header-badge">Atualizado: Julho 2026</div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-tab active" onclick="showTab('julho')">📊 Julho/26</div>
+  <div class="nav-tab" onclick="showTab('historico')">📅 Histórico 2026</div>
+  <div class="nav-tab" onclick="showTab('fluxo')">🔄 Fluxo do Processo</div>
+  <div class="nav-tab" onclick="showTab('dores')">⚠️ Dores & Automação</div>
+</div>
+
+<div class="content">
+
+<!-- ===== ABA 1: JULHO/26 ===== -->
+<div class="section active" id="julho">
+
+  <!-- INSIGHT DO MÊS -->
+  <div class="insight-box">
+    <h3>Insights do mês — Julho/2026</h3>
+    <div class="insight-item"><span class="insight-label">Variação total dos pagamentos</span> Julho registrou um aumento de pagamentos de aproximadamente R$ 3,52 milhões (+26,3%) em relação a junho, totalizando R$ 16,89 milhões em pagamentos realizados. O aumento foi impulsionado principalmente pela folha (salários, férias e comissões, +R$ 1,33 mi combinados), pelo Comex Tech Forum (+R$ 727 mil), pela aquisição da UX (+R$ 694,5 mil) e por Licenças (+R$ 506 mil).</div>
+    <div class="insight-item"><span class="insight-label">Eventos</span> O Comex Tech Forum (Transamérica Expo + estandes) ganhou força no mês (+R$ 727 mil), e temos também os desembolsos da Intermodal 2027.</div>
+    <div class="insight-item"><span class="insight-label">Operacional</span> Salários, Férias e Comissões somaram +R$ 1,33 milhão frente a junho, efeito sazonal do período. Licenças subiu R$ 506 mil, puxado pelo Hubspot (R$ 455,6 mil) e por maior uso de ferramentas de IA (Anthropic + OpenAI, +R$ 174 mil).</div>
+    <div class="insight-item"><span class="insight-label">Tributos</span> IRPJ e CSLL diminuíram. O benefício do Tecnoparque segue vigente, mas o ISS sobre Vendas e Serviços subiu R$ 144,3 mil no mês, acompanhando a alta no faturamento do período.</div>
+    <div class="insight-item" style="margin-bottom:0"><span class="insight-label">Geração líquida do mês</span> Julho fechou com geração líquida de R$ 428 mil (Recebimentos R$ 17,32MM − Pagamentos R$ 16,89MM), abaixo do resultado de junho (R$ 4,06 milhões), reflexo direto do salto nos pagamentos.</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Pago — Jul/26</div>
+      <div class="kpi-value">R$ 16,89<span>MM</span></div>
+      <div class="kpi-delta up">▲ +26,3% vs Jun</div>
+      <div class="kpi-sub">Média jan–jul/26: R$ 16,56MM</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Geração Líquida</div>
+      <div class="kpi-value">R$ 428<span>k</span></div>
+      <div class="kpi-delta down">▼ vs Jun (R$4,06MM)</div>
+      <div class="kpi-sub">Rec. R$17,32MM − Pag. R$16,89MM</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Acionamentos Pipefy</div>
+      <div class="kpi-value">178</div>
+      <div class="kpi-delta up">▲ +19 vs Jun (159)</div>
+      <div class="kpi-sub">Média 2026: ~184/mês</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Juros Pagos</div>
+      <div class="kpi-value">R$ 409<span>,69</span></div>
+      <div class="kpi-delta down">▼ -85% vs Jun</div>
+      <div class="kpi-sub">Menor valor desde dez/25</div>
+    </div>
+  </div>
+
+  <!-- PIPES - CARDS + TOTAL DESTACADO -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 2px 1.4fr;gap:0;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <!-- CP -->
+    <div style="padding:20px 24px;text-align:center;border-right:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Contas a Pagar</div>
+      <div style="font-size:36px;font-weight:300;color:var(--fg);margin-bottom:8px">239</div>
+      <div style="display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;background:#EDE9FE;color:var(--purple-primary)">Pipes abertos</div>
+    </div>
+    <!-- Reembolso -->
+    <div style="padding:20px 24px;text-align:center;border-right:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Reembolso</div>
+      <div style="font-size:36px;font-weight:300;color:var(--fg);margin-bottom:8px">73</div>
+      <div style="display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;background:#FEF3C7;color:#B45309">Pipes abertos</div>
+    </div>
+    <!-- Internacional -->
+    <div style="padding:20px 24px;text-align:center;border-right:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px">Pagto. Internacional</div>
+      <div style="font-size:36px;font-weight:300;color:var(--fg);margin-bottom:8px">11</div>
+      <div style="display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;background:#DBEAFE;color:#1D4ED8">Pipes abertos</div>
+    </div>
+    <!-- divisor visual com sinal = -->
+    <div style="display:flex;align-items:center;justify-content:center;background:var(--bg)">
+      <span style="font-size:20px;color:var(--muted);font-weight:300">=</span>
+    </div>
+    <!-- TOTAL - destaque -->
+    <div style="padding:20px 28px;text-align:center;background:linear-gradient(135deg,var(--purple-dark),var(--purple-primary));position:relative">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.7);margin-bottom:6px">Total de Pipes — Jul/26</div>
+      <div style="font-size:48px;font-weight:700;color:#fff;margin-bottom:6px;font-family:'Funnel Display',sans-serif">323</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.75)">239 CP &nbsp;+&nbsp; 73 Reimb. &nbsp;+&nbsp; 11 Intern.</div>
+    </div>
+  </div>
+
+  <!-- DUAS COLUNAS: REC VS PAG + TOP CATEGORIAS -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Evolução — Recebimentos vs. Pagamentos</div>
+      <div class="card-sub">Jan/26 a Jul/26 · valores em R$ MM</div>
+      <div class="dual-legend">
+        <span><div class="leg-dot" style="background:var(--purple-primary)"></div>Recebimentos</span>
+        <span><div class="leg-dot" style="background:var(--orange)"></div>Pagamentos</span>
+      </div>
+      <div class="dual-chart">
+        <!-- max ref: jan/26 pag ~21MM = 100% -->
+        <div class="dual-row"><div class="dual-month">Jan/26</div><div class="dual-bars"><div class="dual-bar rec" style="width:72%"></div><div class="dual-bar pag" style="width:100%"></div></div><div style="font-size:10px;color:var(--muted);min-width:100px">Rec ~15,3 / Pag ~21,3</div></div>
+        <div class="dual-row"><div class="dual-month">Fev/26</div><div class="dual-bars"><div class="dual-bar rec" style="width:75%"></div><div class="dual-bar pag" style="width:76%"></div></div><div style="font-size:10px;color:var(--muted);min-width:100px">Rec ~16,1 / Pag ~16,1</div></div>
+        <div class="dual-row"><div class="dual-month">Mar/26</div><div class="dual-bars"><div class="dual-bar rec" style="width:89%"></div><div class="dual-bar pag" style="width:71%"></div></div><div style="font-size:10px;color:var(--muted);min-width:100px">Rec ~19,0 / Pag ~15,1</div></div>
+        <div class="dual-row"><div class="dual-month">Abr/26</div><div class="dual-bars"><div class="dual-bar rec" style="width:84%"></div><div class="dual-bar pag" style="width:86%"></div></div><div style="font-size:10px;color:var(--muted);min-width:100px">Rec ~17,8 / Pag ~18,3</div></div>
+        <div class="dual-row"><div class="dual-month">Mai/26</div><div class="dual-bars"><div class="dual-bar rec" style="width:81%"></div><div class="dual-bar pag" style="width:71%"></div></div><div style="font-size:10px;color:var(--muted);min-width:100px">Rec ~17,3 / Pag ~15,0</div></div>
+        <div class="dual-row"><div class="dual-month">Jun/26</div><div class="dual-bars"><div class="dual-bar rec" style="width:79%"></div><div class="dual-bar pag" style="width:63%"></div></div><div style="font-size:10px;color:var(--muted);min-width:100px">Rec ~16,9 / Pag ~13,4</div></div>
+        <div class="dual-row"><div class="dual-month" style="font-weight:700;color:var(--purple-primary)">Jul/26 ★</div><div class="dual-bars"><div class="dual-bar rec" style="width:81%"></div><div class="dual-bar pag" style="width:79%"></div></div><div style="font-size:10px;color:var(--muted);min-width:100px">Rec 17,32 / Pag 16,89</div></div>
+      </div>
+      <div class="highlight-box" style="margin-top:14px">
+        <p>Destaque: Aumento nos pagamentos de julho, impactados principalmente pelas categorias: <strong>Salários, Impostos, Licenças, Eventos e Investimento da UX.</strong></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Top categorias — Jul/26</div>
+      <div class="card-sub">Total top 10: R$ 11,44MM · 67,75% do mês</div>
+      <div class="hbar-chart">
+        <div class="hbar-row">
+          <div class="hbar-label">Salários</div>
+          <div class="hbar-track"><div class="hbar-fill purple" style="width:100%">R$ 3,74MM</div></div>
+          <div class="hbar-val">22,1%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">INSS</div>
+          <div class="hbar-track"><div class="hbar-fill purple" style="width:34%">1,29MM</div></div>
+          <div class="hbar-val">7,6%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">Licenças/CC</div>
+          <div class="hbar-track"><div class="hbar-fill purple" style="width:32%">1,19MM</div></div>
+          <div class="hbar-val">7,0%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">Comex Tech Forum</div>
+          <div class="hbar-track"><div class="hbar-fill orange" style="width:26%">982k</div></div>
+          <div class="hbar-val">5,8%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">IRRF Folha</div>
+          <div class="hbar-track"><div class="hbar-fill purple" style="width:25%">930k</div></div>
+          <div class="hbar-val">5,5%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">Servidores</div>
+          <div class="hbar-track"><div class="hbar-fill purple" style="width:24%">879k</div></div>
+          <div class="hbar-val">5,2%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">IRPJ</div>
+          <div class="hbar-track"><div class="hbar-fill purple" style="width:19%">724k</div></div>
+          <div class="hbar-val">4,3%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">Aquisição UX CP</div>
+          <div class="hbar-track"><div class="hbar-fill orange" style="width:19%">694k</div></div>
+          <div class="hbar-val">4,1%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">Férias</div>
+          <div class="hbar-track"><div class="hbar-fill purple" style="width:14%">511k</div></div>
+          <div class="hbar-val">3,0%</div>
+        </div>
+        <div class="hbar-row">
+          <div class="hbar-label">Adiant. Fornecedor</div>
+          <div class="hbar-track"><div class="hbar-fill purple" style="width:13%">500k</div></div>
+          <div class="hbar-val">3,0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP FORNECEDORES + FORA DA JANELA -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Top 10 fornecedores — Jul/26</div>
+      <div class="card-sub">Total: R$ 12,37MM = 73,3% do mês</div>
+      <table>
+        <thead><tr><th>Fornecedor</th><th style="text-align:right">Valor</th><th style="text-align:right">%</th></tr></thead>
+        <tbody>
+          <tr><td>Colaboradores</td><td class="td-right">R$ 4.858.007</td><td class="td-muted">28,8%</td></tr>
+          <tr><td>Ministério da Fazenda</td><td class="td-right">R$ 2.549.545</td><td class="td-muted">15,1%</td></tr>
+          <tr><td>Governo Federal</td><td class="td-right">R$ 1.672.385</td><td class="td-muted">9,9%</td></tr>
+          <tr><td>Ingram Micro Brasil</td><td class="td-right">R$ 879.033</td><td class="td-muted">5,2%</td></tr>
+          <tr><td>Swile do Brasil</td><td class="td-right">R$ 701.044</td><td class="td-muted">4,2%</td></tr>
+          <tr><td>Hubspot Inc</td><td class="td-right">R$ 455.619</td><td class="td-muted">2,7%</td></tr>
+          <tr><td>Transamerica Expo Center</td><td class="td-right">R$ 393.333</td><td class="td-muted">2,3%</td></tr>
+          <tr><td>Onda Arquitetura</td><td class="td-right">R$ 390.000</td><td class="td-muted">2,3%</td></tr>
+          <tr><td>Pref. Municipal Curitiba</td><td class="td-right">R$ 239.679</td><td class="td-muted">1,4%</td></tr>
+          <tr><td>Cleber Ruyter Moschini</td><td class="td-right">R$ 236.140</td><td class="td-muted">1,4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Pagamentos fora da janela — histórico</div>
+      <div class="card-sub">Valor em R$ processado fora da janela semanal</div>
+      <div class="hbar-chart">
+        <div class="hbar-row"><div class="hbar-label">Jun/25</div><div class="hbar-track"><div class="hbar-fill orange" style="width:23%">R$ 1,08MM</div></div></div>
+        <div class="hbar-row"><div class="hbar-label">Jul/25</div><div class="hbar-track"><div class="hbar-fill orange" style="width:90%">R$ 4,27MM</div></div></div>
+        <div class="hbar-row"><div class="hbar-label">Out/25</div><div class="hbar-track"><div class="hbar-fill orange" style="width:100%">R$ 4,77MM</div></div></div>
+        <div class="hbar-row"><div class="hbar-label">Jan/26</div><div class="hbar-track"><div class="hbar-fill purple" style="width:11%">119k</div></div></div>
+        <div class="hbar-row"><div class="hbar-label">Fev/26</div><div class="hbar-track"><div class="hbar-fill purple" style="width:9%">87k</div></div></div>
+        <div class="hbar-row"><div class="hbar-label">Mar/26</div><div class="hbar-track"><div class="hbar-fill purple" style="width:1%"></div></div><div class="hbar-val">R$ 29</div></div>
+        <div class="hbar-row"><div class="hbar-label">Abr/26</div><div class="hbar-track"><div class="hbar-fill purple" style="width:22%">205k</div></div></div>
+        <div class="hbar-row"><div class="hbar-label">Mai/26</div><div class="hbar-track"><div class="hbar-fill purple" style="width:18%">166k</div></div></div>
+        <div class="hbar-row"><div class="hbar-label">Jun/26</div><div class="hbar-track"><div class="hbar-fill purple" style="width:30%">282k</div></div></div>
+        <div class="hbar-row"><div class="hbar-label" style="font-weight:700;color:var(--purple-primary)">Jul/26 ★</div><div class="hbar-track"><div class="hbar-fill dark" style="width:42%">392k</div></div></div>
+      </div>
+      <p style="font-size:11px;color:var(--success);margin-top:12px;font-weight:600">✅ Controle da janela consolidado vs. 2025 — queda de +95% no valor fora da janela</p>
+    </div>
+  </div>
+
+</div><!-- /julho -->
+
+<!-- ===== ABA 2: HISTÓRICO 2026 ===== -->
+<div class="section" id="historico">
+
+  <div class="section-header">
+    <div>
+      <h2>Histórico 2026 — Visão Consolidada</h2>
+      <p>Janeiro a Julho/26 · todos os indicadores mês a mês</p>
+    </div>
+  </div>
+
+  <!-- TOTAL PAGO -->
+  <div class="card">
+    <div class="card-title">Total pago por mês</div>
+    <div class="card-sub">Em R$ milhões</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:grid;grid-template-columns:60px 1fr 90px;align-items:center;gap:10px">
+        <div style="font-size:12px;color:var(--muted);text-align:right">Jan/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:26px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:600;color:#fff">R$ 21,26MM</div></div>
+        <div style="font-size:12px;color:var(--warning);font-weight:600">↑ PLR</div>
+      </div>
+      <div style="display:grid;grid-template-columns:60px 1fr 90px;align-items:center;gap:10px">
+        <div style="font-size:12px;color:var(--muted);text-align:right">Fev/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:26px;overflow:hidden"><div style="width:76%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:600;color:#fff">R$ 16,12MM</div></div>
+        <div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:60px 1fr 90px;align-items:center;gap:10px">
+        <div style="font-size:12px;color:var(--muted);text-align:right">Mar/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:26px;overflow:hidden"><div style="width:71%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:600;color:#fff">R$ 15,10MM</div></div>
+        <div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:60px 1fr 90px;align-items:center;gap:10px">
+        <div style="font-size:12px;color:var(--muted);text-align:right">Abr/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:26px;overflow:hidden"><div style="width:86%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:600;color:#fff">R$ 18,26MM</div></div>
+        <div style="font-size:12px;color:var(--warning);font-weight:600">↑ Rescisões</div>
+      </div>
+      <div style="display:grid;grid-template-columns:60px 1fr 90px;align-items:center;gap:10px">
+        <div style="font-size:12px;color:var(--muted);text-align:right">Mai/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:26px;overflow:hidden"><div style="width:71%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:600;color:#fff">R$ 15,00MM</div></div>
+        <div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:60px 1fr 90px;align-items:center;gap:10px">
+        <div style="font-size:12px;color:var(--muted);text-align:right">Jun/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:26px;overflow:hidden"><div style="width:63%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:600;color:#fff">R$ 13,37MM</div></div>
+        <div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:60px 1fr 90px;align-items:center;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:var(--purple-primary);text-align:right">Jul/26 ★</div>
+        <div style="background:var(--bg);border-radius:4px;height:26px;overflow:hidden"><div style="width:79%;height:100%;background:linear-gradient(90deg,var(--purple-dark),var(--purple-primary));border-radius:4px;display:flex;align-items:center;padding-left:10px;font-size:12px;font-weight:600;color:#fff">R$ 16,89MM</div></div>
+        <div style="font-size:12px;color:var(--warning);font-weight:600">↑ CTF</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:14px">Média jan–jul/26: <strong style="color:var(--fg)">R$ 16,57MM/mês</strong></p>
+  </div>
+
+  <!-- PIPES + ACIONAMENTOS -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Pipes abertos por tipo</div>
+      <div class="card-sub">CP · Reembolso · Internacional — barras empilhadas · max ref: Jul/26 = 323</div>
+      <!-- legenda -->
+      <div style="display:flex;gap:16px;margin-bottom:14px;font-size:12px">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:2px;background:var(--purple-primary);display:inline-block"></span>CP</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:2px;background:var(--orange);display:inline-block"></span>Reembolso</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:2px;background:#1D4ED8;display:inline-block"></span>Internacional</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <!-- helper macro: max=323 — colunas: mês | barra | intern | total -->
+        <div style="display:grid;grid-template-columns:52px 1fr 28px 36px;align-items:center;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Jan/26</div>
+          <div style="display:flex;height:22px;border-radius:4px;overflow:hidden;gap:1px">
+            <div style="width:71%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">178</div>
+            <div style="width:23%;background:linear-gradient(90deg,var(--orange),#FEB44E);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">58</div>
+            <div style="width:6%;background:#1D4ED8"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:#1D4ED8;text-align:center">10</div>
+          <div style="font-size:11px;font-weight:600;color:var(--fg);text-align:right">246</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 28px 36px;align-items:center;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Fev/26</div>
+          <div style="display:flex;height:22px;border-radius:4px;overflow:hidden;gap:1px">
+            <div style="width:68%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">170</div>
+            <div style="width:27%;background:linear-gradient(90deg,var(--orange),#FEB44E);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">73</div>
+            <div style="width:5%;background:#1D4ED8"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:#1D4ED8;text-align:center">13</div>
+          <div style="font-size:11px;font-weight:600;color:var(--fg);text-align:right">256</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 28px 36px;align-items:center;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Mar/26</div>
+          <div style="display:flex;height:22px;border-radius:4px;overflow:hidden;gap:1px">
+            <div style="width:70%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">209</div>
+            <div style="width:24%;background:linear-gradient(90deg,var(--orange),#FEB44E);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">69</div>
+            <div style="width:6%;background:#1D4ED8"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:#1D4ED8;text-align:center">19</div>
+          <div style="font-size:11px;font-weight:600;color:var(--fg);text-align:right">297</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 28px 36px;align-items:center;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Abr/26</div>
+          <div style="display:flex;height:22px;border-radius:4px;overflow:hidden;gap:1px">
+            <div style="width:64%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">194</div>
+            <div style="width:32%;background:linear-gradient(90deg,var(--orange),#FEB44E);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">97</div>
+            <div style="width:4%;background:#1D4ED8"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:#1D4ED8;text-align:center">13</div>
+          <div style="font-size:11px;font-weight:600;color:var(--fg);text-align:right">304</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 28px 36px;align-items:center;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Mai/26</div>
+          <div style="display:flex;height:22px;border-radius:4px;overflow:hidden;gap:1px">
+            <div style="width:65%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">198</div>
+            <div style="width:31%;background:linear-gradient(90deg,var(--orange),#FEB44E);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">94</div>
+            <div style="width:4%;background:#1D4ED8"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:#1D4ED8;text-align:center">13</div>
+          <div style="font-size:11px;font-weight:600;color:var(--fg);text-align:right">305</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 28px 36px;align-items:center;gap:6px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Jun/26</div>
+          <div style="display:flex;height:22px;border-radius:4px;overflow:hidden;gap:1px">
+            <div style="width:75%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">220</div>
+            <div style="width:22%;background:linear-gradient(90deg,var(--orange),#FEB44E);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">65</div>
+            <div style="width:3%;background:#1D4ED8"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:#1D4ED8;text-align:center">9</div>
+          <div style="font-size:11px;font-weight:600;color:var(--fg);text-align:right">294</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 28px 36px;align-items:center;gap:6px;background:#F5F0FF;border-radius:8px;padding:5px 4px">
+          <div style="font-size:11px;font-weight:700;color:var(--purple-primary);text-align:right">Jul/26 ★</div>
+          <div style="display:flex;height:22px;border-radius:4px;overflow:hidden;gap:1px">
+            <div style="width:74%;background:linear-gradient(90deg,var(--purple-dark),var(--purple-primary));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">239</div>
+            <div style="width:23%;background:linear-gradient(90deg,var(--orange),#FEB44E);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">73</div>
+            <div style="width:3%;background:#1D4ED8"></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:#1D4ED8;text-align:center">11</div>
+          <div style="font-size:11px;font-weight:700;color:var(--purple-primary);text-align:right">323</div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px">Média CP: <strong style="color:var(--fg)">201</strong> · Reimb.: <strong style="color:var(--fg)">76</strong> · Intern.: <strong style="color:#1D4ED8">13</strong></p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Acionamentos Pipefy</div>
+      <div class="card-sub">Interações manuais recebidas pelo time · max: 216 (Mar/26)</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:grid;grid-template-columns:52px 1fr 36px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Jan/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:71%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">154</div></div>
+          <div style="font-size:11px;color:var(--muted);text-align:right">154</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 36px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Fev/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:89%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">192</div></div>
+          <div style="font-size:11px;color:var(--muted);text-align:right">192</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 36px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Mar/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">216 ↑ pico</div></div>
+          <div style="font-size:11px;color:var(--orange);font-weight:700;text-align:right">216</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 36px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Abr/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:84%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">182</div></div>
+          <div style="font-size:11px;color:var(--muted);text-align:right">182</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 36px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Mai/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:84%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">182</div></div>
+          <div style="font-size:11px;color:var(--muted);text-align:right">182</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 36px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Jun/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:74%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">159</div></div>
+          <div style="font-size:11px;color:var(--muted);text-align:right">159</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 36px;align-items:center;gap:8px;background:#F5F0FF;border-radius:8px;padding:5px 4px">
+          <div style="font-size:11px;font-weight:700;color:var(--purple-primary);text-align:right">Jul/26 ★</div>
+          <div style="background:rgba(255,255,255,.6);border-radius:4px;height:22px;overflow:hidden"><div style="width:82%;height:100%;background:linear-gradient(90deg,var(--purple-dark),var(--purple-primary));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">178</div></div>
+          <div style="font-size:11px;font-weight:700;color:var(--purple-primary);text-align:right">178</div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:10px">Média 2026: <strong style="color:var(--fg)">184/mês</strong></p>
+    </div>
+  </div>
+
+  <!-- JUROS + LANÇAMENTOS -->
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Juros pagos — histórico</div>
+      <div class="card-sub">Em R$ · tendência de queda em 2026</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <!-- max ref: Jun/26 = 2.833,48 = 100% -->
+        <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Jan/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:36%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">1.023</div></div>
+          <div style="font-size:11px;color:var(--muted);text-align:right">R$ 1.023,07</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Fev/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:7%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px"></div></div>
+          <div style="font-size:11px;color:var(--success);font-weight:600;text-align:right">▼ R$ 206,72</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Mar/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:50%;height:100%;background:linear-gradient(90deg,var(--danger),#D93535);border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">1.404</div></div>
+          <div style="font-size:11px;color:var(--danger);text-align:right;font-weight:600">▲ R$ 1.404,57</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Abr/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:25%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">709</div></div>
+          <div style="font-size:11px;color:var(--success);text-align:right;font-weight:600">▼ R$ 709,34</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Mai/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:29%;height:100%;background:linear-gradient(90deg,var(--danger),#D93535);border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">830</div></div>
+          <div style="font-size:11px;color:var(--danger);text-align:right;font-weight:600">▲ R$ 830,37</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Jun/26</div>
+          <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,var(--danger),#D93535);border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">2.833</div></div>
+          <div style="font-size:11px;color:var(--danger);text-align:right;font-weight:600">▲ R$ 2.833,48</div>
+        </div>
+        <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px;background:#F5F0FF;border-radius:8px;padding:5px 4px">
+          <div style="font-size:11px;font-weight:700;color:var(--purple-primary);text-align:right">Jul/26 ★</div>
+          <div style="background:rgba(255,255,255,.6);border-radius:4px;height:22px;overflow:hidden"><div style="width:14%;height:100%;background:linear-gradient(90deg,var(--purple-dark),var(--purple-primary));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">409</div></div>
+          <div style="font-size:11px;color:var(--success);text-align:right;font-weight:700">▼ R$ 409,69</div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--success);margin-top:12px;font-weight:600">✅ Jul/26: menor valor do ano — reflexo da melhora no controle da janela</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Lançamentos manuais vs. integração</div>
+      <div class="card-sub">Impacto da ativação do robô Pipefy → Omie</div>
+      <!-- legenda -->
+      <div style="display:flex;gap:16px;margin-bottom:14px;font-size:12px">
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--orange);display:inline-block"></span>Manuais</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--purple-primary);display:inline-block"></span>Integração</span>
+      </div>
+      <!-- max ref: 1.052 (integração dez/25) -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <!-- Jan: Manuais=778, Integração=161 -->
+        <div style="display:grid;grid-template-columns:52px 1fr 38px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Jan/26</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:74%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:3px"></div></div>
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:15%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:3px"></div></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.6">778<br>161</div>
+        </div>
+        <!-- Fev: Manuais=788, Integração=118 -->
+        <div style="display:grid;grid-template-columns:52px 1fr 38px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Fev/26</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:75%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:3px"></div></div>
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:11%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:3px"></div></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.6">788<br>118</div>
+        </div>
+        <!-- Mar: Manuais=672, Integração=129 -->
+        <div style="display:grid;grid-template-columns:52px 1fr 38px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Mar/26</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:64%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:3px"></div></div>
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:12%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:3px"></div></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.6">672<br>129</div>
+        </div>
+        <!-- Abr: Manuais=1.006, Integração=243 -->
+        <div style="display:grid;grid-template-columns:52px 1fr 38px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Abr/26</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:96%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:3px"></div></div>
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:23%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:3px"></div></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.6">1.006<br>243</div>
+        </div>
+        <!-- Mai: Manuais=932, Integração=251 -->
+        <div style="display:grid;grid-template-columns:52px 1fr 38px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Mai/26</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:89%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:3px"></div></div>
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:24%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:3px"></div></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.6">932<br>251</div>
+        </div>
+        <!-- Jun: Manuais=750, Integração=382 -->
+        <div style="display:grid;grid-template-columns:52px 1fr 38px;align-items:center;gap:8px">
+          <div style="font-size:11px;color:var(--muted);text-align:right">Jun/26</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:71%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:3px"></div></div>
+            <div style="background:var(--bg);border-radius:3px;height:13px;overflow:hidden"><div style="width:36%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:3px"></div></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.6">750<br>382</div>
+        </div>
+        <!-- Jul: Manuais=675, Integração=559 — aqui as barras se aproximam! -->
+        <div style="display:grid;grid-template-columns:52px 1fr 38px;align-items:center;gap:8px;background:#F5F0FF;border-radius:8px;padding:6px 4px">
+          <div style="font-size:11px;font-weight:700;color:var(--purple-primary);text-align:right">Jul/26 ★</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="background:rgba(255,255,255,.7);border-radius:3px;height:13px;overflow:hidden"><div style="width:64%;height:100%;background:linear-gradient(90deg,var(--orange),#FEB44E);border-radius:3px"></div></div>
+            <div style="background:rgba(255,255,255,.7);border-radius:3px;height:13px;overflow:hidden"><div style="width:53%;height:100%;background:linear-gradient(90deg,var(--purple-dark),var(--purple-primary));border-radius:3px"></div></div>
+          </div>
+          <div style="font-size:10px;font-weight:700;color:var(--fg);line-height:1.6">675<br>559</div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--info);margin-top:12px;font-weight:600">ℹ️ Integração crescendo — robô Pipefy → Omie reduzindo lançamentos manuais</p>
+    </div>
+  </div>
+
+  <!-- FORA DA JANELA CONSOLIDADO -->
+  <div class="card">
+    <div class="card-title">Pagamentos fora da janela — 2026</div>
+    <div class="card-sub">Valor em R$ · max ref: Jan/26 = R$ 445k</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+        <div style="font-size:11px;color:var(--muted);text-align:right">Jan/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:100%;height:100%;background:linear-gradient(90deg,var(--danger),#D93535);border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">R$ 445k</div></div>
+        <div style="font-size:11px;color:var(--muted);text-align:right">29 ocorrências</div>
+      </div>
+      <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+        <div style="font-size:11px;color:var(--muted);text-align:right">Fev/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:27%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">R$ 119k</div></div>
+        <div style="font-size:11px;color:var(--success);font-weight:600;text-align:right">▼ -73% · 13 ocor.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+        <div style="font-size:11px;color:var(--muted);text-align:right">Mar/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:20%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">R$ 87k</div></div>
+        <div style="font-size:11px;color:var(--success);font-weight:600;text-align:right">▼ -27% · 16 ocor.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+        <div style="font-size:11px;color:var(--muted);text-align:right">Abr/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:46%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">R$ 205k</div></div>
+        <div style="font-size:11px;color:var(--danger);font-weight:600;text-align:right">▲ +136% · 27 ocor.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+        <div style="font-size:11px;color:var(--muted);text-align:right">Mai/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:37%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">R$ 166k</div></div>
+        <div style="font-size:11px;color:var(--success);font-weight:600;text-align:right">▼ -19%</div>
+      </div>
+      <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px">
+        <div style="font-size:11px;color:var(--muted);text-align:right">Jun/26</div>
+        <div style="background:var(--bg);border-radius:4px;height:22px;overflow:hidden"><div style="width:63%;height:100%;background:linear-gradient(90deg,var(--purple-primary),var(--purple-mid));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">R$ 282k</div></div>
+        <div style="font-size:11px;color:var(--danger);font-weight:600;text-align:right">▲ +70%</div>
+      </div>
+      <div style="display:grid;grid-template-columns:52px 1fr 110px;align-items:center;gap:8px;background:#F5F0FF;border-radius:8px;padding:5px 4px">
+        <div style="font-size:11px;font-weight:700;color:var(--purple-primary);text-align:right">Jul/26 ★</div>
+        <div style="background:rgba(255,255,255,.6);border-radius:4px;height:22px;overflow:hidden"><div style="width:88%;height:100%;background:linear-gradient(90deg,var(--purple-dark),var(--purple-primary));border-radius:4px;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:700;color:#fff">R$ 392k</div></div>
+        <div style="font-size:11px;color:var(--danger);font-weight:700;text-align:right">▲ +39% · 40 ocor.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /historico -->
+
+<!-- ===== ABA 3: FLUXO ===== -->
+<div class="section" id="fluxo">
+
+  <div class="section-header">
+    <div>
+      <h2>Fluxo Operacional do CP</h2>
+      <p>Do recebimento da solicitação ao fechamento mensal</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Fluxo — 8 etapas</div>
+    <div class="card-sub">Da triagem Pipefy ao fechamento mensal</div>
+    <div class="flow-wrap">
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-label">Triagem Pipefy</div>
+          <div class="flow-desc">Thaiane confere informações preenchidas × documento anexado × orçamento</div>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-label">Aprovação do Gestor</div>
+          <div class="flow-desc">Gestor aprova o card no Pipefy antes do lançamento</div>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-label">Lançamento Omie</div>
+          <div class="flow-desc">Entrada manual e automática no ERP por Thaiane</div>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-label">Janela de Pagto</div>
+          <div class="flow-desc">Thaiane emite o fluxo, Kamilla analisa, cadastra no banco e pede aprovação Adriano → diretoria</div>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-label">Baixa Omie</div>
+          <div class="flow-desc">Kamilla (ERP + planilha), Thaiane (Pipefy card a card)</div>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <div class="flow-num">6</div>
+          <div class="flow-label">Arquivamento</div>
+          <div class="flow-desc">Thaiane arquiva comprovantes no Drive</div>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <div class="flow-num">7</div>
+          <div class="flow-label">Conciliação Semanal</div>
+          <div class="flow-desc">4ª feira: planilha + extratos + cartões → contabilidade</div>
+        </div>
+        <div class="flow-arrow">›</div>
+        <div class="flow-step">
+          <div class="flow-num">8</div>
+          <div class="flow-label">Fechamento Mensal</div>
+          <div class="flow-desc">Dia 1: contas correntes BR + offshore. Dia 2: investimentos + board</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Sistemas utilizados</div>
+      <div class="card-sub">Stack atual do time de CP</div>
+      <table>
+        <thead><tr><th>Sistema</th><th>Função</th><th style="text-align:center">Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Pipefy</strong></td><td>Intake de solicitações de pagamentos e workflow</td><td style="text-align:center"><span class="pill auto">Ativo</span></td></tr>
+          <tr><td><strong>Omie</strong></td><td>ERP — lançamentos e baixas</td><td style="text-align:center"><span class="pill auto">Ativo</span></td></tr>
+          <tr><td><strong>Google Sheets</strong></td><td>Janela de pagamentos + conciliação</td><td style="text-align:center"><span class="pill auto">Ativo</span></td></tr>
+          <tr><td><strong>Google Drive</strong></td><td>Arquivo de comprovantes e NFs</td><td style="text-align:center"><span class="pill auto">Ativo</span></td></tr>
+          <tr><td><strong>Qive / Arquivei</strong></td><td>Validação de notas fiscais</td><td style="text-align:center"><span class="pill auto">Ativo</span></td></tr>
+          <tr><td><strong>Conta Simples</strong></td><td>Cartão corporativo</td><td style="text-align:center"><span class="pill auto">Ativo</span></td></tr>
+          <tr><td><strong>Onfly</strong></td><td>Cartão Azulzinho — viagens internacionais</td><td style="text-align:center"><span class="pill auto">Ativo</span></td></tr>
+          <tr><td><strong>N8N</strong></td><td>Automação de conciliação bancária</td><td style="text-align:center"><span class="pill dev">Em dev</span></td></tr>
+        </tbody>
+      </table>
+
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cadência semanal</div>
+      <div class="card-sub">Ritmo fixo do time — toda semana</div>
+      <table>
+        <thead><tr><th>Dia</th><th>Atividade</th><th>Resp.</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Seg–Ter</strong></td><td>Triagem e validação dos cards no Pipefy. Thaiane: lançamento dos cartões de crédito. Kamilla: análise de pagamentos da semana, verificando fluxo de caixa para os pagamentos da janela</td><td>Kamilla + Thaiane</td></tr>
+          <tr><td><strong>Quarta</strong></td><td>Janela de pagamento (mín. 10 dias de antecedência). Kamilla cadastra e acompanha pagamentos no banco. Ajustes necessários no sistema, preparação para entrega da conciliação semanal</td><td>Kamilla + Thaiane</td></tr>
+          <tr><td><strong>Quarta</strong></td><td>Conciliação semanal → envio à contabilidade</td><td>Kamilla</td></tr>
+          <tr><td><strong>Quinta</strong></td><td>Baixa no Omie + planilha + Pipefy card a card</td><td>Kamilla + Thaiane</td></tr>
+          <tr><td><strong>Quinta</strong></td><td>Arquivo dos comprovantes no Drive</td><td>Thaiane</td></tr>
+          <tr><td><strong>Dia 1</strong></td><td>Fechamento contas correntes BR + offshore</td><td>Kamilla</td></tr>
+          <tr><td><strong>Dia 2</strong></td><td>Fechamento investimentos + board</td><td>Kamilla</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /fluxo -->
+
+<!-- ===== ABA 4: DORES & AUTOMAÇÃO ===== -->
+<div class="section" id="dores">
+
+  <div class="section-header">
+    <div>
+      <h2>Dores & Oportunidades de Automação</h2>
+      <p>O que ainda é manual, onde trava, e o que já está em andamento</p>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <h3 style="font-size:16px;text-align:left;margin-bottom:6px">🎯 Diretriz 2026: "Eficiência e Controle"</h3>
+    <p style="font-size:13px;color:rgba(255,255,255,.85);line-height:1.6">O time de CP tem como meta reduzir o trabalho manual, eliminar urgências e melhorar a rastreabilidade do fluxo. O Pipefy é o ponto central de orquestração — a automação dele impacta diretamente todos os outros sistemas.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Mapa de dores por etapa do processo</div>
+    <div class="card-sub">O que trava, o que é manual, o que já tem solução</div>
+    <table>
+      <thead>
+        <tr><th>Etapa</th><th>Dor atual</th><th>Impacto</th><th>Solução / Status</th><th style="text-align:center">Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Abertura do card</strong></td>
+          <td>Card aberto com erro (categoria errada, sem NF, sem aprovador)</td>
+          <td>Retrabalho manual, atraso no pagamento</td>
+          <td>Validação obrigatória no formulário de abertura</td>
+          <td style="text-align:center"><span class="pill ok">Em produção — novo pipe</span></td>
+        </tr>
+        <tr>
+          <td><strong>Validação de NF</strong></td>
+          <td>NF validada manualmente no Qive card a card</td>
+          <td>Retrabalho manual por Thaiane</td>
+          <td>Automação conciliação semanal</td>
+          <td style="text-align:center"><span class="pill ok">Em produção</span></td>
+        </tr>
+        <tr>
+          <td><strong>Lançamento Omie</strong></td>
+          <td>675 lançamentos via integração e 559 manuais em jul/26</td>
+          <td>—</td>
+          <td>Robô Pipefy → Omie ativado</td>
+          <td style="text-align:center"><span class="pill dev">Em automação</span></td>
+        </tr>
+        <tr>
+          <td><strong>Aprovação do gestor</strong></td>
+          <td>Gestor não aprova no prazo — card fica parado</td>
+          <td>178 acionamentos/mês para cobrar aprovação</td>
+          <td>Estudar integração Slack para cobrar gestor diretamente</td>
+          <td style="text-align:center"><span class="pill risk">Dor ativa</span></td>
+        </tr>
+        <tr>
+          <td><strong>Janela de pagamento</strong></td>
+          <td>Controle manual em planilha</td>
+          <td>Risco de pagamento fora da janela</td>
+          <td>Robô de emissão da janela semanal</td>
+          <td style="text-align:center"><span class="pill dev">Em automação</span></td>
+        </tr>
+        <tr>
+          <td><strong>Baixa Pipefy</strong></td>
+          <td>Baixa realizada separadamente em sistema (Omie), planilha e Pipefy — poderia ser feita em um único lugar e refletir em todos automaticamente</td>
+          <td>Triplicidade de operação manual</td>
+          <td>Unificação via automação Pipefy</td>
+          <td style="text-align:center"><span class="pill risk">Dor ativa</span></td>
+        </tr>
+        <tr>
+          <td><strong>Conciliação bancária</strong></td>
+          <td>Cruzamento manual Omie × Santander × Qive toda semana</td>
+          <td>Processo manual recorrente</td>
+          <td>N8N Fluxo A — deadline 31/08</td>
+          <td style="text-align:center"><span class="pill dev">Em automação</span></td>
+        </tr>
+        <tr>
+          <td><strong>Visibilidade do solicitante</strong></td>
+          <td>Solicitante não sabe o status do card sem acionar o time</td>
+          <td>178 acionamentos desnecessários/mês</td>
+          <td>Notificação automática via Pipefy + bot Slack</td>
+          <td style="text-align:center"><span class="pill ok">Em produção — novo pipe</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">O que já está sendo automatizado</div>
+      <div class="card-sub">Iniciativas ativas em 2026</div>
+      <div class="dor-grid">
+        <div class="dor-item ok">
+          <h4>✅ Robô de emissão da janela</h4>
+          <p>Criação do robô de emissão da janela semanal, em conjunto com a contabilidade.</p>
+        </div>
+        <div class="dor-item ok">
+          <h4>✅ Conciliação N8N — Fluxo A</h4>
+          <p>Conciliação bancária semanal via API Omie + Qive. Deadline: 31/08.</p>
+        </div>
+        <div class="dor-item dev">
+          <h4>🔄 N8N — Fluxo B</h4>
+          <p>Extensão para fechamento mensal. Planejado para setembro.</p>
+        </div>
+        <div class="dor-item dev">
+          <h4>🔄 Novo Pipefy</h4>
+          <p>Novo fluxo criado entre Thaiane, Christian e Kamilla para otimizar o processo de CP.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Onde a automação do Pipefy pode ajudar</div>
+      <div class="card-sub">Oportunidades mapeadas</div>
+      <table>
+        <thead><tr><th>Oportunidade</th><th>Ganho</th></tr></thead>
+        <tbody>
+          <tr><td>Notificação automática de status para o solicitante</td><td class="td-right" style="color:var(--success)">↓ acionamentos</td></tr>
+          <tr><td>Validação do formulário na abertura (NF obrigatória, campos corretos)</td><td class="td-right" style="color:var(--success)">↓ retrabalho triagem</td></tr>
+          <tr><td>Bot no Slack para cobrar aprovação do gestor (SLA)</td><td class="td-right" style="color:var(--success)">↓ cobranças manuais</td></tr>
+          <tr><td>Baixa automática em Omie + planilha + Pipefy de uma vez</td><td class="td-right" style="color:var(--success)">↓ triplicidade</td></tr>
+          <tr><td>Integração Pipefy → Omie (lançamento automático)</td><td class="td-right" style="color:var(--success)">↑ integração crescendo vs. manuais</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /dores -->
+
+</div><!-- /content -->
+
+<div class="footer">Contas a Pagar · Logcomex · Agosto 2026 — Dados: Apresentações CP Jan–Jul/26</div>
+
+<script>
+function showTab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
